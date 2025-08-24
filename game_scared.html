@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advanced Maze Escape - Scared Emotion Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #e3f2fd;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+    }
+    .game-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    canvas {
+      border: 2px solid #1565c0;
+      background: #fefefe;
+      margin-top: 10px;
+    }
+    .info {
+      margin-top: 15px;
+    }
+    #newTryBtn {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h2>🧭 Scared Game – Maze Challenge</h2>
+    <p>Escape the maze using arrow keys. It's bigger and tougher now!</p>
+    <canvas id="maze" width="400" height="400"></canvas>
+    <div class="info">
+      <p>Moves: <span id="moves">0</span> | Time: <span id="timer">0</span>s</p>
+    </div>
+    <button id="newTryBtn" class="btn btn-primary">New Try</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("maze");
+    const ctx = canvas.getContext("2d");
+    const rows = 10;
+    const cols = 10;
+    const tile = canvas.width / cols;
+
+    // Multiple maze layouts
+    const mazes = [
+      [
+        [0,1,0,0,0,1,0,1,0,0],
+        [0,1,0,1,0,1,0,1,0,1],
+        [0,0,0,1,0,0,0,0,0,1],
+        [1,1,1,1,1,1,0,1,1,1],
+        [0,0,0,0,0,1,0,1,0,0],
+        [0,1,1,1,0,1,0,1,0,1],
+        [0,1,0,0,0,0,0,1,0,1],
+        [0,1,0,1,1,1,0,0,0,1],
+        [0,0,0,0,0,1,1,1,0,0],
+        [1,1,1,1,0,0,0,1,1,0]
+      ],
+      [
+        [0,0,1,0,0,0,1,0,1,0],
+        [1,0,1,0,1,0,1,0,1,0],
+        [1,0,0,0,1,0,0,0,0,0],
+        [1,1,1,0,1,1,1,1,1,0],
+        [0,0,0,0,0,0,0,0,1,0],
+        [0,1,1,1,1,1,1,0,1,0],
+        [0,0,0,0,0,0,1,0,0,0],
+        [1,1,1,1,1,0,1,1,1,0],
+        [0,0,0,0,0,0,0,0,1,0],
+        [0,1,1,1,1,1,1,0,0,0]
+      ],
+      [
+        [0,1,0,1,0,0,0,1,0,0],
+        [0,1,0,1,1,1,0,1,1,0],
+        [0,0,0,0,0,1,0,0,0,0],
+        [1,1,1,1,0,1,1,1,1,0],
+        [0,0,0,1,0,0,0,0,1,0],
+        [0,1,0,1,1,1,1,0,1,0],
+        [0,1,0,0,0,0,1,0,1,0],
+        [0,1,1,1,1,0,1,0,0,0],
+        [0,0,0,0,0,0,1,1,1,0],
+        [1,1,1,1,1,0,0,0,0,0]
+      ]
+    ];
+
+    let maze = [];
+    let x, y, moves, time, timerInterval;
+
+    function initGame() {
+      // Pick a random maze from the mazes array
+      maze = mazes[Math.floor(Math.random() * mazes.length)];
+      x = 0; 
+      y = 0; 
+      moves = 0; 
+      time = 0;
+      document.getElementById("moves").innerText = moves;
+      document.getElementById("timer").innerText = time;
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        time++;
+        document.getElementById("timer").innerText = time;
+      }, 1000);
+
+      drawMaze();
+    }
+
+    function drawMaze() {
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          ctx.fillStyle = maze[r][c] ? "#90a4ae" : "#fff";
+          ctx.fillRect(c * tile, r * tile, tile, tile);
+        }
+      }
+      ctx.fillStyle = "#4caf50"; // player
+      ctx.fillRect(x * tile, y * tile, tile, tile);
+
+      ctx.fillStyle = "#ff5722"; // goal
+      ctx.fillRect((cols - 1) * tile, (rows - 1) * tile, tile, tile);
+    }
+
+    function move(dx, dy) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (nx >= 0 && ny >= 0 && nx < cols && ny < rows && maze[ny][nx] === 0) {
+        x = nx;
+        y = ny;
+        moves++;
+        document.getElementById("moves").innerText = moves;
+        drawMaze();
+        if (x === cols - 1 && y === rows - 1) {
+          clearInterval(timerInterval);
+          const score = Math.max(100 - (moves + time / 2), 20);
+          setTimeout(() => {
+            window.location.href = `/report?emotion=Scared&score=${Math.floor(score)}`;
+          }, 1000);
+        }
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowUp") move(0, -1);
+      if (e.key === "ArrowDown") move(0, 1);
+      if (e.key === "ArrowLeft") move(-1, 0);
+      if (e.key === "ArrowRight") move(1, 0);
+    });
+
+    document.getElementById("newTryBtn").addEventListener("click", initGame);
+
+    // Initialize game on page load
+    initGame();
+  </script>
+</body>
+</html>

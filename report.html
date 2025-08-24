@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Emotional Progress Report - EmoBuddy</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
+    }
+    .report-card {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .score-highlight {
+      font-size: 2rem;
+      color: #4caf50;
+      font-weight: bold;
+    }
+    .section-title {
+      margin-top: 30px;
+      font-weight: bold;
+      color: #1e3a8a;
+    }
+    .btn-group {
+      text-align: center;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="report-card">
+  <h2>🧾 Emotional Progress Report</h2>
+
+  <p><strong>Emotion Selected:</strong> {{ emotion }}</p>
+  <p><strong>Game Completed:</strong> {{ game }}</p>
+  <p><strong>Score Achieved:</strong> <span class="score-highlight">{{ score }}%</span></p>
+
+  <div class="section-title">🧠 Emotion Insight</div>
+  <p>
+    Children feeling <strong>{{ emotion }}</strong> often experience this emotion deeply and personally.
+    Through engaging in games, their ability to express, manage, and improve mood becomes clearer.
+  </p>
+
+  <div class="section-title">📊 Interpretation of Game Score</div>
+  {% if score|int >= 80 %}
+    <p>Excellent! Your responses and focus show a high level of emotional awareness and regulation. You’re doing great!</p>
+  {% elif score|int >= 60 %}
+    <p>You’re on a healthy emotional path. There’s room to grow, and you’re getting stronger every day.</p>
+  {% else %}
+    <p>This is a good start. Let's play a few more times or try talking to someone about how you feel. Progress is always possible.</p>
+  {% endif %}
+
+  <div class="section-title">💡 Suggestions to Improve</div>
+  <ul>
+    <li>Talk openly with someone you trust about how you feel.</li>
+    <li>Practice calming activities like drawing, music, or nature walks.</li>
+    <li>Revisit the game to reflect on your emotion again.</li>
+    <li>Try different emotion games — every feeling matters.</li>
+  </ul>
+
+  <div class="btn-group">
+    <a href="/" class="btn btn-primary">🏠 Back to Home</a>
+    <a href="/consult_bot?emotion={{ emotion }}" class="btn btn-info">💬 Talk to Bot Again</a>
+    <a href="javascript:window.print()" class="btn btn-secondary">🖨️ Download/Print Report</a>
+  </div>
+</div>
+
+</body>
+</html>

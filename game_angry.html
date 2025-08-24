@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Break the Plates - Angry Emotion Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #ffebee;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    .game-container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
+      text-align: center;
+    }
+    #gameArea {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      background: #ffcdd2;
+      border: 4px solid #d32f2f;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .plate {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at center, #fff, #e53935);
+      border-radius: 50%;
+      box-shadow: inset 0 0 10px #b71c1c;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s ease, opacity 0.3s ease;
+      font-weight: bold;
+      color: white;
+      font-size: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 1px 1px 3px #b71c1c;
+    }
+    .broken {
+      transform: rotate(90deg) scale(0);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .scoreboard {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: #b71c1c;
+    }
+    .instructions {
+      font-size: 1.1rem;
+      color: #880e4f;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h2>🍽️ Break the Plates - Angry Emotion Game</h2>
+    <p class="instructions">Click on the plates to break them before they pile up! You have <strong>45 seconds</strong>. Don't let more than 10 plates stack!</p>
+    
+    <div class="scoreboard">
+      <div>Broken Plates: <strong id="score">0</strong></div>
+      <div>Time Left: <strong id="timer">45</strong>s</div>
+      <div>Stack: <strong id="stack">0</strong>/10</div>
+    </div>
+    
+    <div id="gameArea"></div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById('gameArea');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const stackDisplay = document.getElementById('stack');
+
+    let score = 0;
+    let timeLeft = 45;
+    let stack = 0;
+    let plateInterval;
+    let gameTimer;
+
+    function createPlate() {
+      if (stack >= 10) {
+        endGame(false);
+        return;
+      }
+      const plate = document.createElement('div');
+      plate.classList.add('plate');
+      plate.textContent = '🍽️';
+
+      // Random horizontal position inside gameArea
+      const maxLeft = gameArea.clientWidth - 80;
+      const leftPos = Math.random() * maxLeft;
+      plate.style.left = `${leftPos}px`;
+      plate.style.top = `0px`;
+
+      gameArea.appendChild(plate);
+      stack++;
+      stackDisplay.textContent = stack;
+
+      // Animate plate falling down
+      let fallPosition = 0;
+      const fallSpeed = 2 + Math.random() * 2; // pixels per frame
+
+      const fallInterval = setInterval(() => {
+        fallPosition += fallSpeed;
+        plate.style.top = fallPosition + 'px';
+
+        if (fallPosition >= gameArea.clientHeight - 80) {
+          clearInterval(fallInterval);
+        }
+      }, 16); // ~60fps
+
+      plate.addEventListener('click', () => {
+        // Break plate animation
+        plate.classList.add('broken');
+        setTimeout(() => plate.remove(), 300);
+        score++;
+        stack--;
+        scoreDisplay.textContent = score;
+        stackDisplay.textContent = stack;
+        clearInterval(fallInterval);
+      });
+    }
+
+    function startGame() {
+      plateInterval = setInterval(createPlate, 1000);
+      gameTimer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          endGame(true);
+        }
+      }, 1000);
+    }
+
+    function endGame(won) {
+      clearInterval(plateInterval);
+      clearInterval(gameTimer);
+      const finalScore = Math.min(score * 10, 100);
+
+      setTimeout(() => {
+        if(won) {
+          alert(`Time's up! You broke ${score} plates. Great job!`);
+        } else {
+          alert(`Too many plates stacked! You broke ${score} plates. Try again!`);
+        }
+        window.location.href = `/report?emotion=Angry&score=${finalScore}`;
+      }, 500);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
+

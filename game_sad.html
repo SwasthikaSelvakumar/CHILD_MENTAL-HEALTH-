@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sad Game - Emoji Catcher</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(to bottom, #bbdefb, #e3f2fd);
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    #game {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .basket {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 80px;
+      background: url('https://cdn-icons-png.flaticon.com/512/891/891462.png') no-repeat center/contain;
+    }
+
+    .falling {
+      position: absolute;
+      font-size: 2.2rem;
+      animation: fall 4s linear forwards;
+    }
+
+    @keyframes fall {
+      0% { top: -40px; }
+      100% { top: 100vh; }
+    }
+
+    #scoreBoard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      z-index: 1;
+    }
+
+    /* Modal styles */
+    #instructionModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    #modalContent {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 400px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+
+    #modalContent h2 {
+      margin-top: 0;
+    }
+
+    #startBtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #4fc3f7;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #startBtn:hover {
+      background: #039be5;
+    }
+  </style>
+</head>
+<body>
+  <!-- Instruction Modal -->
+  <div id="instructionModal">
+    <div id="modalContent">
+      <h2>💖 Emoji Catcher Game</h2>
+      <p>Move your basket by moving the mouse 🖱️</p>
+      <p>Catch the <strong>happy emojis 💖 🌟 😊</strong>!</p>
+      <p>Avoid the <strong>sad clouds ☁️</strong>!</p>
+      <p>Score 15 points to win!</p>
+      <button id="startBtn">OK, Got It!</button>
+    </div>
+  </div>
+
+  <div id="game">
+    <div id="scoreBoard">Score: <span id="score">0</span> / 15</div>
+    <div class="basket" id="basket"></div>
+  </div>
+
+  <script>
+    const game = document.getElementById('game');
+    const basket = document.getElementById('basket');
+    const scoreDisplay = document.getElementById('score');
+    const modal = document.getElementById('instructionModal');
+    const startBtn = document.getElementById('startBtn');
+
+    let score = 0;
+    let gameRunning = false;
+
+    const items = ['💖', '🌟', '😊', '☁️', '☁️', '☁️']; // Good and bad items
+
+    document.addEventListener('mousemove', (e) => {
+      if (gameRunning) {
+        const x = e.clientX;
+        basket.style.left = `${x}px`;
+      }
+    });
+
+    function spawnItem() {
+      if (!gameRunning) return;
+
+      const item = document.createElement('div');
+      item.classList.add('falling');
+      const content = items[Math.floor(Math.random() * items.length)];
+      item.textContent = content;
+      item.style.left = Math.random() * (window.innerWidth - 40) + 'px';
+      game.appendChild(item);
+
+      const checkCollision = setInterval(() => {
+        const itemRect = item.getBoundingClientRect();
+        const basketRect = basket.getBoundingClientRect();
+
+        if (
+          itemRect.bottom >= basketRect.top &&
+          itemRect.left < basketRect.right &&
+          itemRect.right > basketRect.left
+        ) {
+          game.removeChild(item);
+          clearInterval(checkCollision);
+
+          if (content !== '☁️') {
+            score += 1;
+          } else {
+            score = Math.max(0, score - 1);
+          }
+          scoreDisplay.textContent = score;
+
+          if (score >= 15) {
+            setTimeout(() => {
+              window.location.href = `/report?emotion=Sad&score=${score}`;
+            }, 500);
+          }
+        }
+      }, 50);
+
+      item.addEventListener('animationend', () => {
+        if (game.contains(item)) game.removeChild(item);
+        clearInterval(checkCollision);
+      });
+    }
+
+    let gameLoop;
+
+    startBtn.onclick = () => {
+      modal.style.display = 'none';
+      gameRunning = true;
+      gameLoop = setInterval(spawnItem, 1000);
+    };
+  </script>
+</body>
+</html>

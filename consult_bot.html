@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EmoBuddy Chat</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      height: 100vh;
+      background-color: #f5f7fa;
+      background: url("/static/bg.png") no-repeat center center fixed;
+      background-size: cover;
+    }
+    .sidebar {
+      width: 250px;
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      position: fixed;
+      left: -250px;
+      top: 0;
+      bottom: 0;
+      transition: left 0.3s ease-in-out;
+      z-index: 1000;
+    }
+    .sidebar.show {
+      left: 0;
+    }
+    .sidebar h4 {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .sidebar a {
+      color: #f3f4f6;
+      text-decoration: none;
+      padding: 10px 0;
+      transition: all 0.2s ease;
+    }
+    .sidebar a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    .toggle-btn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1100;
+      background-color: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 18px;
+    }
+    .main-content {
+      flex: 1;
+      margin: auto;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 600px;
+      background: #ffffff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+    .chat-box {
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      background-color: #f9fafb;
+      padding: 20px;
+    }
+    .chat-message {
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    .bot {
+      text-align: left;
+      color: #1e3a8a;
+    }
+    .user {
+      text-align: right;
+      color: #10b981;
+    }
+    .form-control {
+      border-radius: 8px;
+    }
+    .btn-primary {
+      border-radius: 8px;
+      background-color: #2563eb;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <h4>EmoBuddy</h4>
+    <a href="/">Home</a>
+    <a href="/emotion">Emotion</a>
+    <a href="/quiz">Quiz</a>
+    <a href="/consult_bot?emotion={{ emotion }}">New Chat</a>
+    <a href="/game?emotion={{ emotion }}">Game</a>
+    <a href="/video?emotion={{ emotion }}">Video</a>
+    <a href="/report?emotion={{ emotion }}">Report</a>
+  </div>
+
+  <!-- Toggle Button -->
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="chat-container">
+      <h3 class="text-center mb-2">EmoBuddy Chat</h3>
+      <p class="text-center text-muted">You’re feeling: <strong>{{ emotion }}</strong></p>
+      
+
+      <div class="chat-box" id="chatBox"></div>
+
+      <form id="chatForm">
+        <div class="input-group">
+          <input type="text" class="form-control" id="userInput" placeholder="Type your message..." required />
+          <button class="btn btn-primary" type="submit">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    const emotion = "{{ emotion }}";
+
+    const replies = {
+      Sad: [
+        "I'm here for you.",
+        "It's okay to cry sometimes.",
+        "Want to share what's bothering you?",
+        "Remember, you're not alone.",
+        "You matter, and your feelings are valid."
+      ],
+      Happy: [
+        "Yay! I’m happy with you!",
+        "What made you smile today?",
+        "Let’s celebrate your happiness!",
+        "Keep spreading the joy!",
+        "Smiles look good on you."
+      ],
+      Angry: [
+        "Deep breaths, you're safe here.",
+        "Want to talk about what made you angry?",
+        "Let's turn that anger into strength.",
+        "Punch a pillow — or tell me more!",
+        "You’re strong and can control it."
+      ],
+      Scared: [
+        "It’s okay to feel scared.",
+        "Tell me what’s scaring you.",
+        "You’re safe right now.",
+        "Let’s think of a happy place together.",
+        "You’re brave for sharing."
+      ],
+      Numb: [
+        "Feeling nothing is also a feeling.",
+        "Do you want to talk about it?",
+        "Let’s take it slow.",
+        "Sometimes just being here is enough.",
+        "I’m proud of you for trying."
+      ]
+    };
+
+    let count = 0;
+
+    function addMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.className = 'chat-message ' + sender;
+      msg.textContent = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    chatForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const userText = userInput.value.trim();
+      if (!userText) return;
+      addMessage(userText, 'user');
+      userInput.value = '';
+      if (replies[emotion] && count < replies[emotion].length) {
+        setTimeout(() => {
+          addMessage(replies[emotion][count], 'bot');
+          count++;
+        }, 500);
+      } else {
+        addMessage("Let’s take a deep breath and pause.", 'bot');
+      }
+    });
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('show');
+    }
+  </script>
+</body>
+</html>

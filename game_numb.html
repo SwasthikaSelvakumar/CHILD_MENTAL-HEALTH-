@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Color Bloom - Numb Emotion Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 30px;
+      user-select: none;
+    }
+    .game-container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(100, 150, 250, 0.2);
+      text-align: center;
+    }
+    h2 {
+      color: #4a90e2;
+    }
+    #gameArea {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 20px;
+      margin-top: 25px;
+    }
+    .circle {
+      width: 90px;
+      height: 90px;
+      background: #c4c4c4;
+      border-radius: 50%;
+      box-shadow: inset 0 0 15px #9a9a9a;
+      cursor: pointer;
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+    .circle.awake {
+      animation: bloom 1s forwards;
+      cursor: default;
+    }
+    @keyframes bloom {
+      0% {
+        background: #c4c4c4;
+        box-shadow: inset 0 0 15px #9a9a9a;
+      }
+      50% {
+        background: var(--color);
+        box-shadow: 0 0 15px var(--color);
+      }
+      100% {
+        background: var(--color);
+        box-shadow: 0 0 25px var(--color);
+      }
+    }
+    .scoreboard {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+    }
+    .instructions {
+      margin-top: 10px;
+      color: #666;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h2>🌸 Color Bloom - Numb Emotion Game</h2>
+    <p class="instructions">Click each gray circle to awaken it with vibrant colors. Awaken all before time runs out!</p>
+    <div id="gameArea"></div>
+    <div class="scoreboard">
+      <div>Awakened: <span id="awakenedCount">0</span>/25</div>
+      <div>Time Left: <span id="timer">60</span>s</div>
+    </div>
+  </div>
+
+  <script>
+    const colors = [
+      '#4a90e2', '#50e3c2', '#f5a623', '#d0021b', '#9013fe',
+      '#b8e986', '#f8e71c', '#e94e77', '#7ed6df', '#ff6f61'
+    ];
+
+    const gameArea = document.getElementById('gameArea');
+    const awakenedCountDisplay = document.getElementById('awakenedCount');
+    const timerDisplay = document.getElementById('timer');
+
+    let awakenedCount = 0;
+    let totalCircles = 25;
+    let timeLeft = 60;
+    let timerInterval;
+
+    // Create circles
+    for (let i = 0; i < totalCircles; i++) {
+      const circle = document.createElement('div');
+      circle.classList.add('circle');
+      circle.dataset.awake = 'false';
+      circle.style.setProperty('--color', colors[i % colors.length]);
+      gameArea.appendChild(circle);
+
+      circle.addEventListener('click', () => {
+        if (circle.dataset.awake === 'false') {
+          circle.dataset.awake = 'true';
+          circle.classList.add('awake');
+          awakenedCount++;
+          awakenedCountDisplay.textContent = awakenedCount;
+          if (awakenedCount === totalCircles) {
+            endGame(true);
+          }
+        }
+      });
+    }
+
+    // Timer countdown
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          endGame(false);
+        }
+      }, 1000);
+    }
+
+    function endGame(won) {
+      clearInterval(timerInterval);
+      setTimeout(() => {
+        if (won) {
+          alert(`Awesome! You awakened all circles and reconnected with your feelings.`);
+        } else {
+          alert(`Time's up! You awakened ${awakenedCount} out of ${totalCircles}. Try again to reconnect.`);
+        }
+        // Send score to report (scaled 0-100)
+        const finalScore = Math.round((awakenedCount / totalCircles) * 100);
+        window.location.href = `/report?emotion=Numb&score=${finalScore}`;
+      }, 500);
+    }
+
+    startTimer();
+  </script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!-- game_happy.html – Emoji Memory Game with Auto Redirect -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Memory Match - EmoBuddy Happy Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+    .game-container {
+      max-width: 960px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 100px);
+      grid-gap: 15px;
+      justify-content: center;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: transform 0.3s;
+    }
+    .card.flipped {
+      background: #4caf50;
+      color: #fff;
+    }
+    .score-info {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .btn-group {
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h2>Memory Match - Happy Game</h2>
+    <p class="text-center">Match all emoji pairs! 🎯</p>
+    <div class="grid" id="grid"></div>
+    <div class="score-info">
+      <p>Matches: <span id="matchCount">0</span> / 15</p>
+      <p>Attempts: <span id="attempts">0</span></p>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="restartGame()">Try Again 🔄</button>
+    </div>
+  </div>
+
+  <script>
+    const emojis = ['🌞','🍦','🎈','🌈','☁️','🪁','🌸','😊','🍎','⭐','🎂','🌳','🚗','🎁','📚'];
+    let grid = document.getElementById('grid');
+    let matchDisplay = document.getElementById('matchCount');
+    let attemptsDisplay = document.getElementById('attempts');
+
+    let cards = [];
+    let selected = [];
+    let matches = 0;
+    let attempts = 0;
+    let maxAttempts = 30;
+
+    function createCards() {
+      let values = [...emojis, ...emojis];
+      values.sort(() => 0.5 - Math.random());
+      grid.innerHTML = '';
+      values.forEach((val, i) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.emoji = val;
+        card.dataset.index = i;
+        card.textContent = '';
+        card.addEventListener('click', () => handleFlip(card));
+        grid.appendChild(card);
+      });
+    }
+
+    function handleFlip(card) {
+      if (selected.length < 2 && !card.classList.contains('flipped')) {
+        card.classList.add('flipped');
+        card.textContent = card.dataset.emoji;
+        selected.push(card);
+
+        if (selected.length === 2) {
+          attempts++;
+          attemptsDisplay.textContent = attempts;
+          const [a, b] = selected;
+          if (a.dataset.emoji === b.dataset.emoji) {
+            matches++;
+            matchDisplay.textContent = matches;
+            selected = [];
+            if (matches === 15) {
+              let score = Math.floor((15 / attempts) * 100);
+              window.location.href = `/report?emotion=Happy&score=${score}`;
+            }
+          } else {
+            setTimeout(() => {
+              a.classList.remove('flipped');
+              b.classList.remove('flipped');
+              a.textContent = '';
+              b.textContent = '';
+              selected = [];
+            }, 800);
+          }
+
+          if (attempts >= maxAttempts && matches < 15) {
+            let score = Math.floor((matches / 15) * 100);
+            setTimeout(() => {
+              window.location.href = `/report?emotion=Happy&score=${score}`;
+            }, 1000);
+          }
+        }
+      }
+    }
+
+    function restartGame() {
+      matches = 0;
+      attempts = 0;
+      matchDisplay.textContent = 0;
+      attemptsDisplay.textContent = 0;
+      selected = [];
+      createCards();
+    }
+
+    createCards();
+  </script>
+</body>
+</html>
