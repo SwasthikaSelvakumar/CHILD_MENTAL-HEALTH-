@@ -48,22 +48,6 @@ By default:
 
 ---
 
-## 🖼️ Screenshots
-
-### 🔐 Login Page
-
-Centered login screen with username & password.
-
-### 💬 Chat Page
-
-Child-friendly chatbot interface with predefined supportive replies.
-
-### 🎭 Emotion Page
-
-Children can select their current mood easily.
-
----
-
 ## 📖 How It Works
 
 1. User logs in through the **Login Page**.
@@ -77,7 +61,7 @@ Children can select their current mood easily.
 
 * ✅ Add multilingual responses (Tamil, Hindi, etc.)
 * ✅ Integrate speech-based input for accessibility
-* ✅ Enhance with ML-based emotion classification models
+
 
 ---
 
